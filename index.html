@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSPL Auction Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <div class="header-logo-container">
+            <img src="images/TSPL.jpeg" alt="Tournament Logo" class="tournament-logo" onerror="this.style.display='none'">
+        </div>
+        <div class="header-titles">
+            <h1>TSPL AUCTION</h1>
+            <p>TRIVENI SADAN PREMIER LEAGUE</p>
+        </div>
+        <div class="header-spacer"></div>
+    </header>
+
+    <nav class="main-nav" id="navigation-bar">
+        <button class="nav-btn active" onclick="switchTab('auction-view', this)">Live Auction</button>
+        <button class="nav-btn" onclick="switchTab('teams-view', this)">Team Squads</button>
+        <button class="nav-btn" onclick="switchTab('players-view', this)">All Players</button>
+        <button class="nav-btn" onclick="switchTab('owners-view', this)">Team Owners</button>
+    </nav>
+
+    <div id="auction-view" class="view-section active-view">
+        
+        <div class="top-teams-bar" id="top-teams-bar"></div>
+
+        <div class="search-wrapper">
+            <input type="text" id="auction-search" list="player-datalist" placeholder="🔍 Type name " onchange="jumpToPlayer(this.value)">
+            <datalist id="player-datalist"></datalist>
+        </div>
+
+        <div class="main-dashboard">
+            <div class="player-dashboard auction-card">
+                
+                <div class="player-photo-column player-photo-section">
+                    <div class="player-avatar-wrapper" style="height: 100%;">
+                        <img id="player-photo" src="images/default-player.jpg" alt="Player Photo">
+                    </div>
+                </div>
+
+                <div class="player-info-controls-column player-info-section">
+                    <h2 id="player-name">Player Name</h2>
+                    <p id="player-role" class="player-role">Batsman</p>
+                    
+                    <div class="base-price-box" style="margin-bottom: 20px;">
+                        <span class="label">BASE PRICE</span>
+                        <span class="amount">₹1000</span>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px; text-align: center;">
+                        <input type="password" id="admin-pin" placeholder="🔒 Enter Admin PIN to Unlock" 
+                               style="width: 100%; max-width: 300px; padding: 12px 15px; background: rgba(0, 0, 0, 0.4); border: 1px dashed var(--accent-gold); color: white; border-radius: 8px; font-size: 0.95rem; outline: none; text-align: center; letter-spacing: 1px;">
+                    </div>
+                    
+                    <div class="auction-controls bid-controls" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
+                        
+                        <select id="team-selector" class="team-dropdown" style="flex-grow: 1; min-width: 200px;" onchange="if(!isAuthorized()) { this.value=''; }">
+                            <option value="" disabled selected>Select Winning Team...</option>
+                            <option value="TriveniBlasters">TriveniBlasters</option>
+                            <option value="TriveniChallengers">TriveniChallengers</option>
+                            <option value="TriveniHitters">TriveniHitters</option>
+                            <option value="TriveniIndians">TriveniIndians</option>
+                            <option value="TriveniKings">TriveniKings</option>
+                            <option value="TriveniLegends">TriveniLegends</option>
+                            <option value="TriveniStrikers">TriveniStrikers</option>
+                            <option value="TriveniTigers">TriveniTigers</option>
+                        </select>
+                        
+                        <div class="bid-input-group" style="display: flex; border: 1px solid #2A3B5C; border-radius: 6px; overflow: hidden; background: #1a263f;">
+                            <button onclick="decreaseBid()" style="padding: 10px 15px; background: none; color: white; border: none; cursor: pointer; font-size: 1.2rem;">-</button>
+                            <input type="number" id="current-bid" value="1000" readonly style="width: 80px; text-align: center; background: none; border: none; color: var(--accent-gold); font-weight: bold; font-size: 1.1rem; outline: none;">
+                            <button onclick="increaseBid()" style="padding: 10px 15px; background: none; color: white; border: none; cursor: pointer; font-size: 1.2rem;">+</button>
+                        </div>
+                        
+                        <button class="btn-sold sell-btn" onclick="sellPlayer()" style="padding: 12px 25px;">SOLD!</button>
+                    </div>
+
+                    <div class="action-links" style="margin-top: 20px;">
+                        <a href="#" onclick="passPlayer()" style="font-size: 1.1rem; color: #ff4d4d;">Pass / Unsold ➔</a>
+                    </div>
+                </div>
+            </div> 
+
+            <div class="team-squads-container">
+                <h3 class="section-title">SQUAD PLAYER COUNTS</h3>
+                <div class="team-squads-grid" id="team-squads-grid"></div>
+            </div>
+        </div> 
+
+        <div class="admin-controls">
+            <button class="btn-export" onclick="downloadExcel()">📊 Export Results (Excel)</button>
+            <button class="btn-reset" onclick="resetAuction()">⚠️ Reset Auction Data</button>
+        </div>
+    </div> 
+
+    <div id="teams-view" class="view-section hidden-view">
+        <h2 class="page-title">Tournament Teams & Squads</h2>
+        <div class="detailed-teams-grid" id="detailed-teams-container"></div>
+    </div>
+
+    <div id="players-view" class="view-section hidden-view">
+        <h2 class="page-title">Complete Player Roster</h2>
+        <div class="search-wrapper">
+            <input type="text" id="roster-search" placeholder="🔍 Search players by name or role (e.g., Batsman)..." onkeyup="renderAlphabeticalPlayersPage(this.value)">
+        </div>
+        <div class="all-players-grid" id="all-players-container"></div>
+    </div>
+
+   <div id="owners-view" class="view-section hidden-view">
+        <h2 class="page-title">Franchise Owners</h2>
+        <div class="owners-grid" id="owners-container"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
